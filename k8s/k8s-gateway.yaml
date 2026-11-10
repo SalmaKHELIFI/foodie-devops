@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: food-delivery
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: api-gateway}
+  template:
+    metadata:
+      labels: {app: api-gateway}
+    spec:
+      containers:
+        - name: api-gateway
+          image: siwarsrairi/api-gateway:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - {name: JAVA_TOOL_OPTIONS, value: "-Xmx256m"}
+            - {name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE, value: "http://discovery-server:8761/eureka/"}
+            - {name: EUREKA_INSTANCE_PREFER_IP_ADDRESS, value: "true"}
+            - {name: FDP_SECURITY_JWKSETURI, value: "http://192.168.49.1:8180/realms/fdp/protocol/openid-connect/certs"}
+            - {name: FDP_SECURITY_JWK_SET_URI, value: "http://192.168.49.1:8180/realms/fdp/protocol/openid-connect/certs"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: food-delivery
+spec:
+  selector: {app: api-gateway}
+  ports:
+    - {port: 8080, targetPort: 8080}
